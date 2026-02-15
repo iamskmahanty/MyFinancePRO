@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Ledge₹ Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --apple-bg: #f5f5f7;
@@ -27,26 +28,39 @@
             --input-bg: rgba(255, 255, 255, 0.1);
         }
 
-        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
 
         body {
             background-color: var(--apple-bg);
             color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0; padding: 20px 0 100px 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            margin: 0; padding: 0 0 110px 0;
             transition: all 0.3s ease;
+            touch-action: manipulation;
         }
 
-        .container { width: 100%; max-width: 440px; margin: 0 auto; padding: 0 20px; }
+        .mini-top-bar {
+            position: sticky; top: 0; z-index: 1001;
+            background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 12px 20px; display: flex;
+            justify-content: space-between; align-items: center;
+        }
 
-        h1 { font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.5px; }
+        .container { width: 100%; max-width: 440px; margin: 0 auto; padding: 15px; }
+        h1 { font-size: 28px; font-weight: 800; margin: 0; letter-spacing: -1px; }
+
+        .top-balance-badge {
+            font-size: 13px; font-weight: 700; color: white;
+            padding: 5px 14px; border-radius: 20px; background: var(--success);
+        }
 
         .glass-card {
             background: var(--glass);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 20px; padding: 20px; margin-bottom: 20px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+            border-radius: 22px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
         }
 
         .section-label {
@@ -54,7 +68,6 @@
             color: var(--subtext); margin-bottom: 12px; display: block;
         }
 
-        /* Fixed Dropdown & Inputs for Dark Mode */
         input, select, textarea {
             width: 100%; padding: 14px; border-radius: 12px;
             border: 1px solid transparent; background: var(--input-bg);
@@ -62,66 +75,62 @@
             outline: none; appearance: none;
         }
 
-        /* Fix for Dark Mode Dropdown text */
-        select option {
-            background-color: var(--apple-bg);
-            color: var(--text);
-        }
-
+        select option { background-color: var(--apple-bg); color: var(--text); }
         input:focus { border-color: var(--accent); }
 
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .cc-batch { display: none; }
+        .cc-batch.visible { display: grid; }
+        .btn-pagination {
+            grid-column: span 3; background: none; border: 1.5px solid var(--accent);
+            color: var(--accent); padding: 12px; border-radius: 12px;
+            font-size: 13px; font-weight: 700; cursor: pointer; margin-bottom: 10px;
+        }
 
-        /* Floating Nav */
+        .custom-row { display: grid; grid-template-columns: 1.5fr 1fr 45px; gap: 8px; margin-bottom: 10px; align-items: center; }
+        .btn-remove { background: var(--danger); color: white; border: none; border-radius: 10px; height: 45px; cursor: pointer; font-weight: bold; }
+        .btn-add-section { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 5px; }
+
         .tab-bar {
             position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 320px; height: 60px;
-            background: var(--glass); backdrop-filter: blur(30px);
-            border-radius: 30px; border: 1px solid var(--glass-border);
+            width: 92%; max-width: 340px; height: 64px;
+            background: var(--glass); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border-radius: 32px; border: 1px solid var(--glass-border);
             display: flex; justify-content: space-around; align-items: center;
-            z-index: 999; box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            z-index: 999; box-shadow: 0 12px 40px rgba(0,0,0,0.15);
         }
 
-        .tab-item { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; font-size: 11px; font-weight: 600; }
+        .tab-item { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; font-size: 11px; font-weight: 700; flex: 1; }
         .tab-item.active { opacity: 1; color: var(--accent); }
 
-        .result-pill {
-            padding: 20px; border-radius: 16px; text-align: center;
-            background: var(--success); color: white; margin-top: 10px;
-        }
+        .result-pill { padding: 22px; border-radius: 18px; text-align: center; background: var(--success); color: white; margin-top: 10px; transition: 0.3s; }
+        .btn-primary { width: 100%; padding: 18px; border-radius: 16px; border: none; background: var(--text); color: var(--apple-bg); font-size: 17px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        .btn-excel { background: #107c41; color: white; margin-bottom: 25px; }
 
-        .btn-primary {
-            width: 100%; padding: 16px; border-radius: 14px; border: none;
-            background: var(--text); color: var(--apple-bg);
-            font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px;
-        }
-
-        /* History Cards - Deep Detail */
-        .hist-card {
-            background: var(--glass); border-radius: 18px; margin-bottom: 12px;
-            border: 1px solid var(--glass-border); overflow: hidden;
-        }
-        .hist-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .hist-details { 
-            display: none; padding: 0 16px 16px 16px; 
-            font-size: 14px; border-top: 1px solid var(--glass-border);
-        }
-        .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,0.1); }
-        .detail-row:last-child { border: none; }
+        .hist-card { background: var(--glass); border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--glass-border); overflow: hidden; }
+        .hist-header { padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .hist-details { display: none; padding: 0 18px 18px 18px; font-size: 14px; border-top: 1px solid var(--glass-border); line-height: 1.6; }
+        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(128,128,128,0.1); }
+        .detail-row strong { color: var(--accent); }
     </style>
 </head>
 <body data-theme="light">
 
+<div class="mini-top-bar">
+    <div style="font-size: 15px; font-weight: 800; letter-spacing: -0.5px;">Monthly Budget</div>
+    <div id="mini-balance" class="top-balance-badge">₹ 0</div>
+</div>
+
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
         <h1>Ledge₹ Pro</h1>
-        <button onclick="toggleTheme()" style="background:none; border:none; font-size:22px; cursor:pointer">🌓</button>
+        <button onclick="toggleTheme()" style="background:none; border:none; font-size:24px; cursor:pointer">🌓</button>
     </div>
 
     <div id="calc-view" class="view">
         <div class="glass-card">
             <input type="hidden" id="edit-id">
-            <div class="section-label">📅 Budget Period</div>
+            <div class="section-label">📅 Period</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <select id="month">
                     <option>January</option><option>February</option><option>March</option>
@@ -129,60 +138,79 @@
                     <option>July</option><option>August</option><option>September</option>
                     <option>October</option><option>November</option><option>December</option>
                 </select>
-                <input type="text" id="year" value="2026">
+                <input type="text" id="year" inputmode="numeric" value="2026">
             </div>
             <label class="section-label">💵 Net Salary</label>
-            <input type="text" id="salary" placeholder="₹ 0" oninput="format(this)">
+            <input type="text" id="salary" inputmode="decimal" placeholder="₹ 0" oninput="format(this)">
         </div>
 
         <div class="glass-card">
-            <span class="section-label">📈 Investments & Savings</span>
-            <input type="text" class="inp" id="mf" placeholder="Mutual Fund / SIP" oninput="format(this)">
-            <input type="text" class="inp" id="fd" placeholder="Fixed Deposit / Savings" oninput="format(this)">
+            <span class="section-label">📈 Savings & Investments</span>
+            <input type="text" class="inp" id="mf" inputmode="decimal" placeholder="Mutual Funds" oninput="format(this)">
+            <input type="text" class="inp" id="fd" inputmode="decimal" placeholder="Fixed Deposits" oninput="format(this)">
 
-            <span class="section-label">💳 Credit Cards (5)</span>
-            <div class="grid-3">
-                <input type="text" class="inp cc" placeholder="Card 1" oninput="format(this)">
-                <input type="text" class="inp cc" placeholder="Card 2" oninput="format(this)">
-                <input type="text" class="inp cc" placeholder="Card 3" oninput="format(this)">
-                <input type="text" class="inp cc" placeholder="Card 4" oninput="format(this)">
-                <input type="text" class="inp cc" placeholder="Card 5" oninput="format(this)">
+            <span class="section-label">💳 Card Bills</span>
+            <div id="cc-batch-1" class="cc-batch visible grid-3">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C1" oninput="format(this)">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C2" oninput="format(this)">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C3" oninput="format(this)">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C4" oninput="format(this)">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C5" oninput="format(this)">
+                <button class="btn-pagination" onclick="showBatch(2)">Next Batch ➔</button>
             </div>
+            <div id="cc-batch-2" class="cc-batch grid-3">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C6" oninput="format(this)">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C7" oninput="format(this)">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C8" oninput="format(this)">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C9" oninput="format(this)">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C10" oninput="format(this)">
+                <button class="btn-pagination" onclick="showBatch(3)">Next Batch ➔</button>
+            </div>
+            <div id="cc-batch-3" class="cc-batch grid-3">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C11" oninput="format(this)">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C12" oninput="format(this)">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C13" oninput="format(this)">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C14" oninput="format(this)">
+                <input type="text" class="inp cc" inputmode="decimal" placeholder="C15" oninput="format(this)">
+                <button class="btn-pagination" onclick="showBatch(1)">Back ➔</button>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <span class="section-label">⚙️ Custom Expense builder</span>
+            <div id="custom-container"></div>
+            <button class="btn-add-section" onclick="addCustomField()">+ Create Section</button>
         </div>
 
         <div class="glass-card">
             <span class="section-label">🏠 Transfers & Others</span>
-            <input type="text" class="inp" id="home" placeholder="Money to Home" oninput="format(this)">
-            
+            <input type="text" class="inp" id="home" inputmode="decimal" placeholder="Money to Home" oninput="format(this)">
             <div style="display:flex; justify-content:space-between; align-items:center">
-                <span class="section-label">🧮 Other Exp (Math)</span>
+                <span class="section-label">🧮 Math Engine</span>
                 <span id="math-preview" style="font-size:12px; font-weight:bold; color:var(--accent)">₹ 0</span>
             </div>
-            <input type="text" id="math-input" placeholder="e.g. 1500 + 400" oninput="solveMath(this)">
-            <textarea id="reason" placeholder="Expense description..." rows="2"></textarea>
+            <input type="text" id="math-input" placeholder="e.g. 2000 + 500" oninput="solveMath(this)">
+            <textarea id="reason" placeholder="Notes..." rows="2"></textarea>
         </div>
 
         <div class="result-pill" id="res-bg">
-            <div style="font-size:12px; opacity:0.8; font-weight:600">REMAINING FOR SELF</div>
-            <div id="self-val" style="font-size:28px; font-weight:800; margin-top:4px">₹ 0</div>
+            <div style="font-size:12px; opacity:0.9; font-weight:600">REMAINING FOR SELF</div>
+            <div id="self-val" style="font-size:32px; font-weight:800; margin-top:4px">₹ 0</div>
         </div>
 
-        <button class="btn-primary" id="save-btn" onclick="saveRecord()">Save Monthly Entry</button>
-        <button id="cancel-btn" onclick="resetForm()" style="display:none; width:100%; background:none; border:none; color:var(--subtext); margin-top:10px; font-weight:600; cursor:pointer">Cancel Edit</button>
+        <button class="btn-primary" id="save-btn" onclick="saveRecord()">Secure Save Entry</button>
+        <button id="cancel-btn" onclick="resetForm()" style="display:none; width:100%; background:none; border:none; color:var(--subtext); margin-top:15px; font-weight:600; cursor:pointer">Cancel Update</button>
     </div>
 
     <div id="hist-view" class="view" style="display:none;">
+        <button class="btn-primary btn-excel" onclick="exportToExcel()">📊 Export All (Excel)</button>
         <div id="hist-container"></div>
     </div>
 </div>
 
 <div class="tab-bar">
-    <div class="tab-item active" onclick="tab('calc-view', this)">
-        <span style="font-size:18px; display:block">📊</span>Calc
-    </div>
-    <div class="tab-item" onclick="tab('hist-view', this)">
-        <span style="font-size:18px; display:block">📜</span>Records
-    </div>
+    <div class="tab-item active" onclick="tab('calc-view', this)"><span>📊</span><br>Calculator</div>
+    <div class="tab-item" onclick="tab('hist-view', this)"><span>📜</span><br>History</div>
 </div>
 
 <script>
@@ -201,6 +229,23 @@
         if(id === 'hist-view') renderHistory();
     }
 
+    function showBatch(num) {
+        document.querySelectorAll('.cc-batch').forEach(b => b.classList.remove('visible'));
+        document.getElementById('cc-batch-' + num).classList.add('visible');
+    }
+
+    function addCustomField(name = "", value = "") {
+        const container = document.getElementById('custom-container');
+        const row = document.createElement('div');
+        row.className = 'custom-row';
+        row.innerHTML = `
+            <input type="text" class="c-name" placeholder="Name" value="${name}">
+            <input type="text" class="c-val inp" inputmode="decimal" placeholder="₹ 0" value="${value}" oninput="format(this)">
+            <button class="btn-remove" onclick="this.parentElement.remove(); calculate();">✕</button>
+        `;
+        container.appendChild(row);
+    }
+
     function format(el) {
         let val = el.value.replace(/,/g, '');
         if (!isNaN(val) && val !== "") el.value = indian.format(val);
@@ -213,7 +258,7 @@
             mathVal = expr ? eval(expr) : 0;
             document.getElementById('math-preview').innerText = "₹ " + indian.format(mathVal);
             calculate();
-        } catch(e) { document.getElementById('math-preview').innerText = "Math Error"; }
+        } catch(e) { document.getElementById('math-preview').innerText = "Error"; }
     }
 
     function get(id) { return parseFloat(document.getElementById(id).value.replace(/,/g, '')) || 0; }
@@ -225,51 +270,57 @@
         const rem = sal - exp;
         document.getElementById('self-val').innerText = "₹ " + indian.format(rem);
         document.getElementById('res-bg').style.background = rem < 0 ? "var(--danger)" : "var(--success)";
+        const miniBal = document.getElementById('mini-balance');
+        miniBal.innerText = "₹ " + indian.format(rem);
+        miniBal.style.background = rem < 0 ? "var(--danger)" : "var(--success)";
     }
 
     function saveRecord() {
         const sal = get('salary');
         if(!sal) return alert("Please enter salary");
-
+        const customs = Array.from(document.querySelectorAll('.custom-row')).map(row => ({
+            n: row.querySelector('.c-name').value || "Extra",
+            v: parseFloat(row.querySelector('.c-val').value.replace(/,/g, '')) || 0
+        }));
         const rec = {
             id: document.getElementById('edit-id').value || Date.now(),
-            m: document.getElementById('month').value,
-            y: document.getElementById('year').value,
-            sal: sal, mf: get('mf'), fd: get('fd'), home: get('home'),
-            other: mathVal, formula: document.getElementById('math-input').value,
-            reason: document.getElementById('reason').value,
+            m: document.getElementById('month').value, y: document.getElementById('year').value,
+            s: sal, mf: get('mf'), fd: get('fd'), h: get('home'),
+            o: mathVal, f: document.getElementById('math-input').value,
+            r: document.getElementById('reason').value, c: customs,
             cc: Array.from(document.querySelectorAll('.cc')).map(i => parseFloat(i.value.replace(/,/g, '')) || 0)
         };
-
-        let db = JSON.parse(localStorage.getItem('ledge_v3_db') || '[]');
+        let db = JSON.parse(localStorage.getItem('ledge_v4_db') || '[]');
         const eid = document.getElementById('edit-id').value;
         if(eid) db = db.map(x => x.id == eid ? rec : x);
         else db.unshift(rec);
-
-        localStorage.setItem('ledge_v3_db', JSON.stringify(db));
+        localStorage.setItem('ledge_v4_db', JSON.stringify(db));
         resetForm();
-        alert("Entry Saved! 📁");
+        alert("Saved Successfully!");
     }
 
     function resetForm() {
         document.getElementById('edit-id').value = "";
         document.getElementById('salary').value = "";
         document.querySelectorAll('.inp').forEach(i => i.value = "");
+        document.getElementById('custom-container').innerHTML = "";
         document.getElementById('math-input').value = "";
         document.getElementById('reason').value = "";
-        document.getElementById('save-btn').innerText = "Save Monthly Entry";
+        document.getElementById('save-btn').innerText = "Secure Save Entry";
         document.getElementById('cancel-btn').style.display = "none";
         mathVal = 0;
+        showBatch(1);
         calculate();
     }
 
     function renderHistory() {
-        const db = JSON.parse(localStorage.getItem('ledge_v3_db') || '[]');
+        const db = JSON.parse(localStorage.getItem('ledge_v4_db') || '[]');
         const cont = document.getElementById('hist-container');
         cont.innerHTML = db.length === 0 ? '<p style="text-align:center; opacity:0.5; margin-top:50px">No records found</p>' : 
         db.map(r => {
             const ccSum = r.cc.reduce((a,b)=>a+b, 0);
-            const bal = r.sal - (r.mf + r.fd + r.home + r.other + ccSum);
+            const cSum = r.c ? r.c.reduce((a,b)=>a+b.v, 0) : 0;
+            const bal = r.s - (r.mf + r.fd + r.h + r.o + ccSum + cSum);
             return `
             <div class="hist-card">
                 <div class="hist-header" onclick="toggleDetails(${r.id})">
@@ -277,16 +328,18 @@
                     <span style="opacity:0.3">▼</span>
                 </div>
                 <div class="hist-details" id="det-${r.id}">
-                    <div class="detail-row"><span>Total Salary</span><span>₹ ${indian.format(r.sal)}</span></div>
-                    <div class="detail-row"><span>Mutual Fund</span><span>₹ ${indian.format(r.mf)}</span></div>
-                    <div class="detail-row"><span>Savings/FD</span><span>₹ ${indian.format(r.fd)}</span></div>
-                    <div class="detail-row"><span>Credit Cards</span><span>₹ ${indian.format(ccSum)}</span></div>
-                    <div class="detail-row"><span>To Home</span><span>₹ ${indian.format(r.home)}</span></div>
-                    <div class="detail-row"><span>Other Exp</span><span>₹ ${indian.format(r.other)}</span></div>
-                    ${r.reason ? `<div style="font-size:12px; padding:10px; background:rgba(0,0,0,0.03); border-radius:8px; margin-top:10px"><b>Note:</b> ${r.reason}</div>` : ''}
+                    <div class="detail-row"><span>Monthly Income</span><span>₹ ${indian.format(r.s)}</span></div>
+                    <div class="detail-row"><span>Mutual Funds (MF)</span><span>₹ ${indian.format(r.mf)}</span></div>
+                    <div class="detail-row"><span>Fixed Deposit (FD)</span><span>₹ ${indian.format(r.fd)}</span></div>
+                    ${r.c ? r.c.map(custom => `<div class="detail-row"><span>${custom.n}</span><span>₹ ${indian.format(custom.v)}</span></div>`).join('') : ''}
+                    <div class="detail-row"><span>Credit Card Total</span><span>₹ ${indian.format(ccSum)}</span></div>
+                    <div class="detail-row"><span>To Home</span><span>₹ ${indian.format(r.h)}</span></div>
+                    <div class="detail-row"><span>Calculated Other</span><span>₹ ${indian.format(r.o)}</span></div>
+                    <div class="detail-row"><strong>Final Remaining</strong><strong>₹ ${indian.format(bal)}</strong></div>
+                    ${r.r ? `<div style="font-size:12px; padding:10px; background:rgba(0,0,0,0.03); border-radius:8px; margin-top:10px"><b>Notes:</b> ${r.r}</div>` : ''}
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px">
-                        <button onclick="loadEdit(${r.id})" style="padding:12px; border:none; border-radius:10px; background:var(--accent); color:white; font-weight:bold">Edit</button>
-                        <button onclick="deleteRec(${r.id})" style="padding:12px; border:none; border-radius:10px; background:rgba(255,59,48,0.1); color:var(--danger); font-weight:bold">Delete</button>
+                        <button onclick="loadEdit(${r.id})" style="padding:14px; border:none; border-radius:12px; background:var(--accent); color:white; font-weight:bold">Edit</button>
+                        <button onclick="deleteRec(${r.id})" style="padding:14px; border:none; border-radius:12px; background:rgba(255,59,48,0.1); color:var(--danger); font-weight:bold">Delete</button>
                     </div>
                 </div>
             </div>`;
@@ -299,20 +352,22 @@
     }
 
     function loadEdit(id) {
-        const db = JSON.parse(localStorage.getItem('ledge_v3_db') || '[]');
+        const db = JSON.parse(localStorage.getItem('ledge_v4_db') || '[]');
         const r = db.find(i => i.id == id);
+        resetForm();
         document.getElementById('edit-id').value = r.id;
         document.getElementById('month').value = r.m;
         document.getElementById('year').value = r.y;
-        document.getElementById('salary').value = indian.format(r.sal);
+        document.getElementById('salary').value = indian.format(r.s);
         document.getElementById('mf').value = indian.format(r.mf);
         document.getElementById('fd').value = indian.format(r.fd);
-        document.getElementById('home').value = indian.format(r.home);
-        document.getElementById('math-input').value = r.formula || r.other;
-        document.getElementById('reason').value = r.reason;
-        r.cc.forEach((v, i) => document.querySelectorAll('.cc')[i].value = indian.format(v));
-        
-        document.getElementById('save-btn').innerText = "Update Record";
+        document.getElementById('home').value = indian.format(r.h);
+        document.getElementById('math-input').value = r.f || r.o;
+        document.getElementById('reason').value = r.r;
+        const ccInputs = document.querySelectorAll('.cc');
+        r.cc.forEach((v, i) => { if(ccInputs[i]) ccInputs[i].value = v ? indian.format(v) : ""; });
+        if(r.c) r.c.forEach(c => addCustomField(c.n, indian.format(c.v)));
+        document.getElementById('save-btn').innerText = "Update Record Entry";
         document.getElementById('cancel-btn').style.display = "block";
         solveMath(document.getElementById('math-input'));
         tab('calc-view', document.querySelectorAll('.tab-item')[0]);
@@ -320,10 +375,30 @@
 
     function deleteRec(id) {
         if(confirm("Delete this entry?")) {
-            let db = JSON.parse(localStorage.getItem('ledge_v3_db') || '[]');
-            localStorage.setItem('ledge_v3_db', JSON.stringify(db.filter(i => i.id != id)));
+            let db = JSON.parse(localStorage.getItem('ledge_v4_db') || '[]');
+            localStorage.setItem('ledge_v4_db', JSON.stringify(db.filter(i => i.id != id)));
             renderHistory();
         }
+    }
+
+    function exportToExcel() {
+        const db = JSON.parse(localStorage.getItem('ledge_v4_db') || '[]');
+        if(db.length === 0) return alert("No records.");
+        const data = db.map(r => {
+            const ccSum = r.cc.reduce((a,b)=>a+b, 0);
+            const customSum = r.c ? r.c.reduce((a,b)=>a+b.v, 0) : 0;
+            return {
+                "Month": r.m, "Year": r.y, "Salary": r.s,
+                "Mutual Funds": r.mf, "FD": r.fd, "Cards": ccSum, "Home": r.h,
+                "Custom": customSum, "Other": r.o,
+                "Remaining": r.s - (r.mf + r.fd + r.h + r.o + ccSum + customSum),
+                "Note": r.r
+            };
+        });
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Financials");
+        XLSX.writeFile(wb, "LedgeR_Pro_Data.xlsx");
     }
 </script>
 </body>
