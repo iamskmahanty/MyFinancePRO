@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WalletPro Ledger</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --section: #f1f5f9;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --primary: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --nav-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg: #020617;
+            --card: #1e293b;
+            --section: #0f172a;
+            --border: #334155;
+            --text: #f8fafc;
+            --primary: #3b82f6;
+            --nav-bg: #1e293b;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0; padding: 0 0 90px 0;
+            transition: background 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* Responsive Container */
+        .container { width: 100%; max-width: 500px; margin: 0 auto; padding: 15px; }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--nav-bg);
+            display: flex; justify-content: space-around;
+            padding: 12px 0; border-top: 1px solid var(--border);
+            z-index: 1000; box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            text-align: center; cursor: pointer; flex: 1;
+            color: var(--text); opacity: 0.4; transition: 0.2s;
+        }
+
+        .nav-item.active { opacity: 1; color: var(--primary); font-weight: bold; }
+        .nav-icon { font-size: 1.5rem; display: block; }
+
+        /* Card Elements */
+        .glass-card {
+            background: var(--card); border-radius: 20px;
+            padding: 20px; margin-bottom: 15px;
+            border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .section-box {
+            background: var(--section); border-radius: 12px;
+            padding: 12px; margin: 12px 0; border: 1px solid var(--border);
+        }
+
+        h2 { font-size: 0.75rem; text-transform: uppercase; color: var(--primary); margin: 0 0 10px 0; letter-spacing: 0.5px; }
+
+        input, select, textarea {
+            width: 100%; padding: 12px; border-radius: 10px;
+            border: 1.5px solid var(--border); background: var(--card);
+            color: var(--text); font-size: 1rem; margin-bottom: 10px;
+            outline: none; transition: border-color 0.2s;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+        .result-pill {
+            background: var(--success); color: white; padding: 18px;
+            border-radius: 15px; text-align: center; font-weight: 800; font-size: 1.2rem;
+            margin-top: 10px; transition: background 0.3s;
+        }
+
+        .btn-save {
+            width: 100%; padding: 16px; border: none; border-radius: 15px;
+            background: var(--primary); color: white; font-weight: 700;
+            font-size: 1rem; margin-top: 10px;
+        }
+
+        /* Expandable Records */
+        .record-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; margin-bottom: 8px; cursor: pointer;
+        }
+
+        .record-content {
+            display: none; padding: 15px; background: var(--section);
+            border-radius: 0 0 12px 12px; margin: -12px 0 10px 0;
+            border: 1px solid var(--border); border-top: none;
+        }
+
+        .row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    </style>
+</head>
+<body data-theme="light">
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+        <h1 style="font-size: 1.5rem; margin:0">Ledger ₹</h1>
+        <button onclick="toggleTheme()" style="background:none; border:none; font-size:1.4rem;">🌓</button>
+    </div>
+
+    <div id="calc" class="view active">
+        <div class="glass-card">
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;">
+                <select id="month">
+                    <option>January</option><option>February</option><option>March</option>
+                    <option>April</option><option>May</option><option>June</option>
+                    <option>July</option><option>August</option><option>September</option>
+                    <option>October</option><option>November</option><option>December</option>
+                </select>
+                <input type="text" id="year" placeholder="Year" value="2026">
+            </div>
+            <label style="font-size: 0.7rem; font-weight: bold; opacity: 0.6;">SALARY</label>
+            <input type="text" id="salary" placeholder="₹ 0" oninput="mask(this)">
+        </div>
+
+        <div class="glass-card">
+            <div class="section-box">
+                <h2>Investments</h2>
+                <input type="text" class="inp" id="mf" placeholder="Mutual Funds" oninput="mask(this)">
+                <input type="text" class="inp" id="fd" placeholder="Savings / FD" oninput="mask(this)">
+            </div>
+
+            <div class="section-box">
+                <h2>Credit Cards</h2>
+                <div class="grid-3">
+                    <input type="text" class="inp cc" placeholder="C1" oninput="mask(this)">
+                    <input type="text" class="inp cc" placeholder="C2" oninput="mask(this)">
+                    <input type="text" class="inp cc" placeholder="C3" oninput="mask(this)">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+                    <input type="text" class="inp cc" placeholder="Card 4" oninput="mask(this)">
+                    <input type="text" class="inp cc" placeholder="Card 5" oninput="mask(this)">
+                </div>
+            </div>
+
+            <div class="section-box">
+                <h2>Others</h2>
+                <input type="text" class="inp" id="home" placeholder="Money to Home" oninput="mask(this)">
+                <input type="text" class="inp" id="other" placeholder="Other Expense Amount" oninput="mask(this)">
+                <textarea id="reason" placeholder="Reason for other expense..." rows="2"></textarea>
+            </div>
+
+            <div class="result-pill" id="result">₹ 0</div>
+            <button class="btn-save" onclick="save()">Save & Reset</button>
+        </div>
+    </div>
+
+    <div id="history" class="view">
+        <div id="history-list"></div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="tabs('calc', this)">
+        <span class="nav-icon">📊</span>Calculator
+    </div>
+    <div class="nav-item" onclick="tabs('history', this)">
+        <span class="nav-icon">📂</span>Records
+    </div>
+</div>
+
+<script>
+    const indianFmt = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
+
+    function toggleTheme() {
+        document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    function tabs(id, el) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        el.classList.add('active');
+        if(id === 'history') renderHistory();
+    }
+
+    function mask(el) {
+        let val = el.value.replace(/,/g, '');
+        if (!isNaN(val) && val !== "") el.value = indianFmt.format(val);
+        calc();
+    }
+
+    function getNum(id) {
+        return parseFloat(document.getElementById(id).value.replace(/,/g, '')) || 0;
+    }
+
+    function calc() {
+        const sal = getNum('salary');
+        let exp = 0;
+        document.querySelectorAll('.inp').forEach(i => exp += parseFloat(i.value.replace(/,/g, '')) || 0);
+        const rem = sal - exp;
+        const res = document.getElementById('result');
+        res.innerText = "Self: ₹ " + indianFmt.format(rem);
+        res.style.background = rem < 0 ? "var(--danger)" : "var(--success)";
+    }
+
+    function save() {
+        const sal = getNum('salary');
+        if(!sal) return alert("Enter salary");
+
+        const record = {
+            id: Date.now(),
+            m: document.getElementById('month').value,
+            y: document.getElementById('year').value,
+            sal: sal,
+            mf: getNum('mf'), fd: getNum('fd'),
+            home: getNum('home'), other: getNum('other'),
+            reason: document.getElementById('reason').value,
+            cc: Array.from(document.querySelectorAll('.cc')).map(i => parseFloat(i.value.replace(/,/g, '')) || 0)
+        };
+
+        let data = JSON.parse(localStorage.getItem('ledger_data') || '[]');
+        data.unshift(record);
+        localStorage.setItem('ledger_data', JSON.stringify(data));
+        
+        // Reset Logic
+        document.getElementById('salary').value = "";
+        document.querySelectorAll('.inp').forEach(i => i.value = "");
+        document.getElementById('reason').value = "";
+        calc();
+        alert("Record Saved!");
+    }
+
+    function toggleRecord(id) {
+        const content = document.getElementById('content-' + id);
+        const isVisible = content.style.display === 'block';
+        content.style.display = isVisible ? 'none' : 'block';
+    }
+
+    function del(id) {
+        if(confirm("Delete this record?")) {
+            let data = JSON.parse(localStorage.getItem('ledger_data') || '[]');
+            data = data.filter(r => r.id !== id);
+            localStorage.setItem('ledger_data', JSON.stringify(data));
+            renderHistory();
+        }
+    }
+
+    function renderHistory() {
+        const data = JSON.parse(localStorage.getItem('ledger_data') || '[]');
+        const list = document.getElementById('history-list');
+        list.innerHTML = data.length === 0 ? '<p style="text-align:center; opacity:0.5; margin-top:50px">No records found</p>' : 
+        data.map(r => {
+            const totalCC = r.cc.reduce((a,b)=>a+b, 0);
+            const rem = r.sal - (r.mf + r.fd + r.home + r.other + totalCC);
+            return `
+            <div style="margin-bottom:10px">
+                <div class="record-header" onclick="toggleRecord(${r.id})">
+                    <div><strong>${r.m} ${r.y}</strong><br><small>Self: ₹ ${indianFmt.format(rem)}</small></div>
+                    <span>▼</span>
+                </div>
+                <div class="record-content" id="content-${r.id}">
+                    <div class="row"><span>Salary:</span><span>₹ ${indianFmt.format(r.sal)}</span></div>
+                    <div class="row"><span>MF/FD:</span><span>₹ ${indianFmt.format(r.mf + r.fd)}</span></div>
+                    <div class="row"><span>Credit Cards:</span><span>₹ ${indianFmt.format(totalCC)}</span></div>
+                    <div class="row"><span>Home:</span><span>₹ ${indianFmt.format(r.home)}</span></div>
+                    <div class="row"><span>Other:</span><span>₹ ${indianFmt.format(r.other)}</span></div>
+                    <p style="font-size:0.8rem; background:rgba(0,0,0,0.03); padding:8px; border-radius:5px"><b>Reason:</b> ${r.reason || 'N/A'}</p>
+                    <button onclick="del(${r.id})" style="width:100%; padding:8px; border:none; background:#fee2e2; color:#dc2626; border-radius:8px; font-weight:bold; cursor:pointer">DELETE RECORD</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+</script>
+
+</body>
+</html>
