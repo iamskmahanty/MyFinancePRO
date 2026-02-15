@@ -2,290 +2,329 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WalletPro Ledger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ledge₹ Pro</title>
     <style>
         :root {
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --section: #f1f5f9;
-            --border: #e2e8f0;
-            --text: #0f172a;
-            --primary: #2563eb;
-            --success: #10b981;
-            --danger: #ef4444;
-            --nav-bg: #ffffff;
+            --apple-bg: #f5f5f7;
+            --glass: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --text: #1d1d1f;
+            --subtext: #86868b;
+            --accent: #0071e3;
+            --success: #34c759;
+            --danger: #ff3b30;
+            --input-bg: rgba(0, 0, 0, 0.05);
         }
 
         [data-theme="dark"] {
-            --bg: #020617;
-            --card: #1e293b;
-            --section: #0f172a;
-            --border: #334155;
-            --text: #f8fafc;
-            --primary: #3b82f6;
-            --nav-bg: #1e293b;
+            --apple-bg: #000000;
+            --glass: rgba(28, 28, 30, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text: #f5f5f7;
+            --subtext: #a1a1a6;
+            --accent: #0a84ff;
+            --input-bg: rgba(255, 255, 255, 0.1);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
         body {
-            background: var(--bg);
+            background-color: var(--apple-bg);
             color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0; padding: 0 0 90px 0;
-            transition: background 0.3s;
-            overflow-x: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0; padding: 20px 0 100px 0;
+            transition: all 0.3s ease;
         }
 
-        /* Responsive Container */
-        .container { width: 100%; max-width: 500px; margin: 0 auto; padding: 15px; }
+        .container { width: 100%; max-width: 440px; margin: 0 auto; padding: 0 20px; }
 
-        /* Bottom Nav */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: var(--nav-bg);
-            display: flex; justify-content: space-around;
-            padding: 12px 0; border-top: 1px solid var(--border);
-            z-index: 1000; box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
-        }
+        h1 { font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.5px; }
 
-        .nav-item {
-            text-align: center; cursor: pointer; flex: 1;
-            color: var(--text); opacity: 0.4; transition: 0.2s;
-        }
-
-        .nav-item.active { opacity: 1; color: var(--primary); font-weight: bold; }
-        .nav-icon { font-size: 1.5rem; display: block; }
-
-        /* Card Elements */
         .glass-card {
-            background: var(--card); border-radius: 20px;
-            padding: 20px; margin-bottom: 15px;
-            border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            background: var(--glass);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.04);
         }
 
-        .section-box {
-            background: var(--section); border-radius: 12px;
-            padding: 12px; margin: 12px 0; border: 1px solid var(--border);
+        .section-label {
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            color: var(--subtext); margin-bottom: 12px; display: block;
         }
 
-        h2 { font-size: 0.75rem; text-transform: uppercase; color: var(--primary); margin: 0 0 10px 0; letter-spacing: 0.5px; }
-
+        /* Fixed Dropdown & Inputs for Dark Mode */
         input, select, textarea {
-            width: 100%; padding: 12px; border-radius: 10px;
-            border: 1.5px solid var(--border); background: var(--card);
-            color: var(--text); font-size: 1rem; margin-bottom: 10px;
-            outline: none; transition: border-color 0.2s;
+            width: 100%; padding: 14px; border-radius: 12px;
+            border: 1px solid transparent; background: var(--input-bg);
+            color: var(--text); font-size: 16px; margin-bottom: 12px;
+            outline: none; appearance: none;
         }
-        input:focus { border-color: var(--primary); }
 
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        /* Fix for Dark Mode Dropdown text */
+        select option {
+            background-color: var(--apple-bg);
+            color: var(--text);
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+        /* Floating Nav */
+        .tab-bar {
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 320px; height: 60px;
+            background: var(--glass); backdrop-filter: blur(30px);
+            border-radius: 30px; border: 1px solid var(--glass-border);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 999; box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .tab-item { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; font-size: 11px; font-weight: 600; }
+        .tab-item.active { opacity: 1; color: var(--accent); }
 
         .result-pill {
-            background: var(--success); color: white; padding: 18px;
-            border-radius: 15px; text-align: center; font-weight: 800; font-size: 1.2rem;
-            margin-top: 10px; transition: background 0.3s;
+            padding: 20px; border-radius: 16px; text-align: center;
+            background: var(--success); color: white; margin-top: 10px;
         }
 
-        .btn-save {
-            width: 100%; padding: 16px; border: none; border-radius: 15px;
-            background: var(--primary); color: white; font-weight: 700;
-            font-size: 1rem; margin-top: 10px;
+        .btn-primary {
+            width: 100%; padding: 16px; border-radius: 14px; border: none;
+            background: var(--text); color: var(--apple-bg);
+            font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px;
         }
 
-        /* Expandable Records */
-        .record-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px; background: var(--card); border: 1px solid var(--border);
-            border-radius: 12px; margin-bottom: 8px; cursor: pointer;
+        /* History Cards - Deep Detail */
+        .hist-card {
+            background: var(--glass); border-radius: 18px; margin-bottom: 12px;
+            border: 1px solid var(--glass-border); overflow: hidden;
         }
-
-        .record-content {
-            display: none; padding: 15px; background: var(--section);
-            border-radius: 0 0 12px 12px; margin: -12px 0 10px 0;
-            border: 1px solid var(--border); border-top: none;
+        .hist-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .hist-details { 
+            display: none; padding: 0 16px 16px 16px; 
+            font-size: 14px; border-top: 1px solid var(--glass-border);
         }
-
-        .row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
-        .view { display: none; }
-        .view.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+        .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,0.1); }
+        .detail-row:last-child { border: none; }
     </style>
 </head>
 <body data-theme="light">
 
 <div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
-        <h1 style="font-size: 1.5rem; margin:0">Ledger ₹</h1>
-        <button onclick="toggleTheme()" style="background:none; border:none; font-size:1.4rem;">🌓</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h1>Ledge₹ Pro</h1>
+        <button onclick="toggleTheme()" style="background:none; border:none; font-size:22px; cursor:pointer">🌓</button>
     </div>
 
-    <div id="calc" class="view active">
+    <div id="calc-view" class="view">
         <div class="glass-card">
-            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;">
+            <input type="hidden" id="edit-id">
+            <div class="section-label">📅 Budget Period</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <select id="month">
                     <option>January</option><option>February</option><option>March</option>
                     <option>April</option><option>May</option><option>June</option>
                     <option>July</option><option>August</option><option>September</option>
                     <option>October</option><option>November</option><option>December</option>
                 </select>
-                <input type="text" id="year" placeholder="Year" value="2026">
+                <input type="text" id="year" value="2026">
             </div>
-            <label style="font-size: 0.7rem; font-weight: bold; opacity: 0.6;">SALARY</label>
-            <input type="text" id="salary" placeholder="₹ 0" oninput="mask(this)">
+            <label class="section-label">💵 Net Salary</label>
+            <input type="text" id="salary" placeholder="₹ 0" oninput="format(this)">
         </div>
 
         <div class="glass-card">
-            <div class="section-box">
-                <h2>Investments</h2>
-                <input type="text" class="inp" id="mf" placeholder="Mutual Funds" oninput="mask(this)">
-                <input type="text" class="inp" id="fd" placeholder="Savings / FD" oninput="mask(this)">
-            </div>
+            <span class="section-label">📈 Investments & Savings</span>
+            <input type="text" class="inp" id="mf" placeholder="Mutual Fund / SIP" oninput="format(this)">
+            <input type="text" class="inp" id="fd" placeholder="Fixed Deposit / Savings" oninput="format(this)">
 
-            <div class="section-box">
-                <h2>Credit Cards</h2>
-                <div class="grid-3">
-                    <input type="text" class="inp cc" placeholder="C1" oninput="mask(this)">
-                    <input type="text" class="inp cc" placeholder="C2" oninput="mask(this)">
-                    <input type="text" class="inp cc" placeholder="C3" oninput="mask(this)">
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-                    <input type="text" class="inp cc" placeholder="Card 4" oninput="mask(this)">
-                    <input type="text" class="inp cc" placeholder="Card 5" oninput="mask(this)">
-                </div>
+            <span class="section-label">💳 Credit Cards (5)</span>
+            <div class="grid-3">
+                <input type="text" class="inp cc" placeholder="Card 1" oninput="format(this)">
+                <input type="text" class="inp cc" placeholder="Card 2" oninput="format(this)">
+                <input type="text" class="inp cc" placeholder="Card 3" oninput="format(this)">
+                <input type="text" class="inp cc" placeholder="Card 4" oninput="format(this)">
+                <input type="text" class="inp cc" placeholder="Card 5" oninput="format(this)">
             </div>
-
-            <div class="section-box">
-                <h2>Others</h2>
-                <input type="text" class="inp" id="home" placeholder="Money to Home" oninput="mask(this)">
-                <input type="text" class="inp" id="other" placeholder="Other Expense Amount" oninput="mask(this)">
-                <textarea id="reason" placeholder="Reason for other expense..." rows="2"></textarea>
-            </div>
-
-            <div class="result-pill" id="result">₹ 0</div>
-            <button class="btn-save" onclick="save()">Save & Reset</button>
         </div>
+
+        <div class="glass-card">
+            <span class="section-label">🏠 Transfers & Others</span>
+            <input type="text" class="inp" id="home" placeholder="Money to Home" oninput="format(this)">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center">
+                <span class="section-label">🧮 Other Exp (Math)</span>
+                <span id="math-preview" style="font-size:12px; font-weight:bold; color:var(--accent)">₹ 0</span>
+            </div>
+            <input type="text" id="math-input" placeholder="e.g. 1500 + 400" oninput="solveMath(this)">
+            <textarea id="reason" placeholder="Expense description..." rows="2"></textarea>
+        </div>
+
+        <div class="result-pill" id="res-bg">
+            <div style="font-size:12px; opacity:0.8; font-weight:600">REMAINING FOR SELF</div>
+            <div id="self-val" style="font-size:28px; font-weight:800; margin-top:4px">₹ 0</div>
+        </div>
+
+        <button class="btn-primary" id="save-btn" onclick="saveRecord()">Save Monthly Entry</button>
+        <button id="cancel-btn" onclick="resetForm()" style="display:none; width:100%; background:none; border:none; color:var(--subtext); margin-top:10px; font-weight:600; cursor:pointer">Cancel Edit</button>
     </div>
 
-    <div id="history" class="view">
-        <div id="history-list"></div>
+    <div id="hist-view" class="view" style="display:none;">
+        <div id="hist-container"></div>
     </div>
 </div>
 
-<div class="bottom-nav">
-    <div class="nav-item active" onclick="tabs('calc', this)">
-        <span class="nav-icon">📊</span>Calculator
+<div class="tab-bar">
+    <div class="tab-item active" onclick="tab('calc-view', this)">
+        <span style="font-size:18px; display:block">📊</span>Calc
     </div>
-    <div class="nav-item" onclick="tabs('history', this)">
-        <span class="nav-icon">📂</span>Records
+    <div class="tab-item" onclick="tab('hist-view', this)">
+        <span style="font-size:18px; display:block">📜</span>Records
     </div>
 </div>
 
 <script>
-    const indianFmt = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
+    const indian = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
+    let mathVal = 0;
 
     function toggleTheme() {
         document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     }
 
-    function tabs(id, el) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+    function tab(id, el) {
+        document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).style.display = 'block';
         el.classList.add('active');
-        if(id === 'history') renderHistory();
+        if(id === 'hist-view') renderHistory();
     }
 
-    function mask(el) {
+    function format(el) {
         let val = el.value.replace(/,/g, '');
-        if (!isNaN(val) && val !== "") el.value = indianFmt.format(val);
-        calc();
+        if (!isNaN(val) && val !== "") el.value = indian.format(val);
+        calculate();
     }
 
-    function getNum(id) {
-        return parseFloat(document.getElementById(id).value.replace(/,/g, '')) || 0;
+    function solveMath(el) {
+        try {
+            let expr = el.value.replace(/[^-()\d/*+.]/g, '');
+            mathVal = expr ? eval(expr) : 0;
+            document.getElementById('math-preview').innerText = "₹ " + indian.format(mathVal);
+            calculate();
+        } catch(e) { document.getElementById('math-preview').innerText = "Math Error"; }
     }
 
-    function calc() {
-        const sal = getNum('salary');
-        let exp = 0;
+    function get(id) { return parseFloat(document.getElementById(id).value.replace(/,/g, '')) || 0; }
+
+    function calculate() {
+        const sal = get('salary');
+        let exp = mathVal;
         document.querySelectorAll('.inp').forEach(i => exp += parseFloat(i.value.replace(/,/g, '')) || 0);
         const rem = sal - exp;
-        const res = document.getElementById('result');
-        res.innerText = "Self: ₹ " + indianFmt.format(rem);
-        res.style.background = rem < 0 ? "var(--danger)" : "var(--success)";
+        document.getElementById('self-val').innerText = "₹ " + indian.format(rem);
+        document.getElementById('res-bg').style.background = rem < 0 ? "var(--danger)" : "var(--success)";
     }
 
-    function save() {
-        const sal = getNum('salary');
-        if(!sal) return alert("Enter salary");
+    function saveRecord() {
+        const sal = get('salary');
+        if(!sal) return alert("Please enter salary");
 
-        const record = {
-            id: Date.now(),
+        const rec = {
+            id: document.getElementById('edit-id').value || Date.now(),
             m: document.getElementById('month').value,
             y: document.getElementById('year').value,
-            sal: sal,
-            mf: getNum('mf'), fd: getNum('fd'),
-            home: getNum('home'), other: getNum('other'),
+            sal: sal, mf: get('mf'), fd: get('fd'), home: get('home'),
+            other: mathVal, formula: document.getElementById('math-input').value,
             reason: document.getElementById('reason').value,
             cc: Array.from(document.querySelectorAll('.cc')).map(i => parseFloat(i.value.replace(/,/g, '')) || 0)
         };
 
-        let data = JSON.parse(localStorage.getItem('ledger_data') || '[]');
-        data.unshift(record);
-        localStorage.setItem('ledger_data', JSON.stringify(data));
-        
-        // Reset Logic
+        let db = JSON.parse(localStorage.getItem('ledge_v3_db') || '[]');
+        const eid = document.getElementById('edit-id').value;
+        if(eid) db = db.map(x => x.id == eid ? rec : x);
+        else db.unshift(rec);
+
+        localStorage.setItem('ledge_v3_db', JSON.stringify(db));
+        resetForm();
+        alert("Entry Saved! 📁");
+    }
+
+    function resetForm() {
+        document.getElementById('edit-id').value = "";
         document.getElementById('salary').value = "";
         document.querySelectorAll('.inp').forEach(i => i.value = "");
+        document.getElementById('math-input').value = "";
         document.getElementById('reason').value = "";
-        calc();
-        alert("Record Saved!");
-    }
-
-    function toggleRecord(id) {
-        const content = document.getElementById('content-' + id);
-        const isVisible = content.style.display === 'block';
-        content.style.display = isVisible ? 'none' : 'block';
-    }
-
-    function del(id) {
-        if(confirm("Delete this record?")) {
-            let data = JSON.parse(localStorage.getItem('ledger_data') || '[]');
-            data = data.filter(r => r.id !== id);
-            localStorage.setItem('ledger_data', JSON.stringify(data));
-            renderHistory();
-        }
+        document.getElementById('save-btn').innerText = "Save Monthly Entry";
+        document.getElementById('cancel-btn').style.display = "none";
+        mathVal = 0;
+        calculate();
     }
 
     function renderHistory() {
-        const data = JSON.parse(localStorage.getItem('ledger_data') || '[]');
-        const list = document.getElementById('history-list');
-        list.innerHTML = data.length === 0 ? '<p style="text-align:center; opacity:0.5; margin-top:50px">No records found</p>' : 
-        data.map(r => {
-            const totalCC = r.cc.reduce((a,b)=>a+b, 0);
-            const rem = r.sal - (r.mf + r.fd + r.home + r.other + totalCC);
+        const db = JSON.parse(localStorage.getItem('ledge_v3_db') || '[]');
+        const cont = document.getElementById('hist-container');
+        cont.innerHTML = db.length === 0 ? '<p style="text-align:center; opacity:0.5; margin-top:50px">No records found</p>' : 
+        db.map(r => {
+            const ccSum = r.cc.reduce((a,b)=>a+b, 0);
+            const bal = r.sal - (r.mf + r.fd + r.home + r.other + ccSum);
             return `
-            <div style="margin-bottom:10px">
-                <div class="record-header" onclick="toggleRecord(${r.id})">
-                    <div><strong>${r.m} ${r.y}</strong><br><small>Self: ₹ ${indianFmt.format(rem)}</small></div>
-                    <span>▼</span>
+            <div class="hist-card">
+                <div class="hist-header" onclick="toggleDetails(${r.id})">
+                    <div><strong>${r.m} ${r.y}</strong><br><small style="color:var(--subtext)">Self: ₹ ${indian.format(bal)}</small></div>
+                    <span style="opacity:0.3">▼</span>
                 </div>
-                <div class="record-content" id="content-${r.id}">
-                    <div class="row"><span>Salary:</span><span>₹ ${indianFmt.format(r.sal)}</span></div>
-                    <div class="row"><span>MF/FD:</span><span>₹ ${indianFmt.format(r.mf + r.fd)}</span></div>
-                    <div class="row"><span>Credit Cards:</span><span>₹ ${indianFmt.format(totalCC)}</span></div>
-                    <div class="row"><span>Home:</span><span>₹ ${indianFmt.format(r.home)}</span></div>
-                    <div class="row"><span>Other:</span><span>₹ ${indianFmt.format(r.other)}</span></div>
-                    <p style="font-size:0.8rem; background:rgba(0,0,0,0.03); padding:8px; border-radius:5px"><b>Reason:</b> ${r.reason || 'N/A'}</p>
-                    <button onclick="del(${r.id})" style="width:100%; padding:8px; border:none; background:#fee2e2; color:#dc2626; border-radius:8px; font-weight:bold; cursor:pointer">DELETE RECORD</button>
+                <div class="hist-details" id="det-${r.id}">
+                    <div class="detail-row"><span>Total Salary</span><span>₹ ${indian.format(r.sal)}</span></div>
+                    <div class="detail-row"><span>Mutual Fund</span><span>₹ ${indian.format(r.mf)}</span></div>
+                    <div class="detail-row"><span>Savings/FD</span><span>₹ ${indian.format(r.fd)}</span></div>
+                    <div class="detail-row"><span>Credit Cards</span><span>₹ ${indian.format(ccSum)}</span></div>
+                    <div class="detail-row"><span>To Home</span><span>₹ ${indian.format(r.home)}</span></div>
+                    <div class="detail-row"><span>Other Exp</span><span>₹ ${indian.format(r.other)}</span></div>
+                    ${r.reason ? `<div style="font-size:12px; padding:10px; background:rgba(0,0,0,0.03); border-radius:8px; margin-top:10px"><b>Note:</b> ${r.reason}</div>` : ''}
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px">
+                        <button onclick="loadEdit(${r.id})" style="padding:12px; border:none; border-radius:10px; background:var(--accent); color:white; font-weight:bold">Edit</button>
+                        <button onclick="deleteRec(${r.id})" style="padding:12px; border:none; border-radius:10px; background:rgba(255,59,48,0.1); color:var(--danger); font-weight:bold">Delete</button>
+                    </div>
                 </div>
             </div>`;
         }).join('');
     }
-</script>
 
+    function toggleDetails(id) {
+        const d = document.getElementById('det-' + id);
+        d.style.display = d.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function loadEdit(id) {
+        const db = JSON.parse(localStorage.getItem('ledge_v3_db') || '[]');
+        const r = db.find(i => i.id == id);
+        document.getElementById('edit-id').value = r.id;
+        document.getElementById('month').value = r.m;
+        document.getElementById('year').value = r.y;
+        document.getElementById('salary').value = indian.format(r.sal);
+        document.getElementById('mf').value = indian.format(r.mf);
+        document.getElementById('fd').value = indian.format(r.fd);
+        document.getElementById('home').value = indian.format(r.home);
+        document.getElementById('math-input').value = r.formula || r.other;
+        document.getElementById('reason').value = r.reason;
+        r.cc.forEach((v, i) => document.querySelectorAll('.cc')[i].value = indian.format(v));
+        
+        document.getElementById('save-btn').innerText = "Update Record";
+        document.getElementById('cancel-btn').style.display = "block";
+        solveMath(document.getElementById('math-input'));
+        tab('calc-view', document.querySelectorAll('.tab-item')[0]);
+    }
+
+    function deleteRec(id) {
+        if(confirm("Delete this entry?")) {
+            let db = JSON.parse(localStorage.getItem('ledge_v3_db') || '[]');
+            localStorage.setItem('ledge_v3_db', JSON.stringify(db.filter(i => i.id != id)));
+            renderHistory();
+        }
+    }
+</script>
 </body>
 </html>
